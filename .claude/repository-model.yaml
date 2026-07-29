@@ -1,0 +1,445 @@
+version: 1
+facts:
+  languages:
+    - id: lang-yaml
+      value: YAML
+      evidence:
+        - charts/hawkbit/Chart.yaml
+        - charts/hono/Chart.yaml
+        - packages/cloud2edge/values.yaml
+    - id: lang-helm-template
+      value: Helm Go templates
+      evidence:
+        - charts/hawkbit/templates/deployment.yaml
+        - charts/hono/templates/hono-adapter-mqtt/hono-adapter-mqtt-deployment.yaml
+        - packages/cloud2edge/templates/post-install-job.yaml
+    - id: lang-bash
+      value: Bash
+      evidence:
+        - .github/kubeval.sh
+        - charts/hawkbit/lint.sh
+        - packages/cloud2edge/post-install/post-install.sh
+    - id: lang-ruby
+      value: Ruby
+      evidence:
+        - homepage/Gemfile
+        - homepage/_plugins/alert.rb
+  frameworks:
+    - id: fw-helm
+      value: Helm
+      evidence:
+        - charts/hawkbit/Chart.yaml
+        - .github/workflows/ci.yaml
+        - .jenkins/Jenkinsfile
+    - id: fw-kubernetes
+      value: Kubernetes
+      evidence:
+        - README.md
+        - charts/hawkbit/templates/deployment.yaml
+        - .github/kind-config.yaml
+    - id: fw-jekyll
+      value: Jekyll
+      evidence:
+        - homepage/Gemfile
+        - homepage/_config.yml
+        - homepage/README.md
+    - id: fw-chart-testing
+      value: chart-testing (ct)
+      evidence:
+        - .github/ct.yaml
+        - .github/workflows/ci.yaml
+  commands:
+    - id: cmd-ct-lint
+      name: ct-lint
+      value: ct lint ${{ env.CONFIG_OPTION_CHART_TESTING }}
+      evidence:
+        - .github/workflows/ci.yaml
+    - id: cmd-ct-install
+      name: ct-install
+      value: ct install ${{ env.CONFIG_OPTION_CHART_TESTING }}
+      evidence:
+        - .github/workflows/ci.yaml
+    - id: cmd-kubeval
+      name: kubeval
+      value: .github/kubeval.sh
+      evidence:
+        - .github/workflows/ci.yaml
+        - .github/kubeval.sh
+    - id: cmd-helm-lint-hawkbit
+      name: helm-lint-hawkbit
+      value: helm lint .
+      evidence:
+        - charts/hawkbit/lint.sh
+    - id: cmd-helm-package
+      name: helm-package
+      value: ${WORKSPACE}/helm package -u "$(dirname $i)" -d helm-repository
+      evidence:
+        - .jenkins/Jenkinsfile
+    - id: cmd-jekyll-serve
+      name: jekyll-serve
+      value: docker run --rm --volume="$PWD:/srv/jekyll:z" --volume="$PWD/vendor/bundle:/usr/local/bundle:z" -eJEKYLL_UID=$UID -p 4000:4000 -it docker.io/jekyll/jekyll:$JEKYLL_VERSION jekyll serve
+      evidence:
+        - homepage/README.md
+    - id: cmd-hawkbit-render-test
+      name: hawkbit-render-test
+      value: render-test.sh <env> [--update]
+      evidence:
+        - charts/hawkbit/test/render-test.sh
+    - id: cmd-helm-install-hawkbit
+      name: helm-install-hawkbit
+      value: helm install eclipse-hawkbit eclipse-iot/hawkbit
+      evidence:
+        - charts/hawkbit/README.md
+    - id: cmd-helm-install-hono
+      name: helm-install-hono
+      value: helm install eclipse-hono eclipse-iot/hono -n hono --wait
+      evidence:
+        - charts/hono/README.md
+  entry_points:
+    - id: entry-ci-workflow
+      value: .github/workflows/ci.yaml
+      evidence:
+        - .github/workflows/ci.yaml
+    - id: entry-jenkinsfile
+      value: .jenkins/Jenkinsfile
+      evidence:
+        - .jenkins/Jenkinsfile
+    - id: entry-chart-hawkbit
+      value: charts/hawkbit/Chart.yaml
+      evidence:
+        - charts/hawkbit/Chart.yaml
+    - id: entry-chart-hono
+      value: charts/hono/Chart.yaml
+      evidence:
+        - charts/hono/Chart.yaml
+    - id: entry-chart-ditto
+      value: charts/ditto/Chart.yaml
+      evidence:
+        - charts/ditto/Chart.yaml
+    - id: entry-pkg-cloud2edge
+      value: packages/cloud2edge/Chart.yaml
+      evidence:
+        - packages/cloud2edge/Chart.yaml
+    - id: entry-pkg-telemetry-e2e
+      value: packages/telemetry-e2e/Chart.yaml
+      evidence:
+        - packages/telemetry-e2e/Chart.yaml
+    - id: entry-homepage-index
+      value: homepage/index.md
+      evidence:
+        - homepage/index.md
+        - homepage/_config.yml
+    - id: entry-contributing
+      value: CONTRIBUTING.md
+      evidence:
+        - CONTRIBUTING.md
+  components:
+    - id: comp-chart-hawkbit
+      name: hawkbit
+      path: charts/hawkbit
+      evidence:
+        - charts/hawkbit/Chart.yaml
+        - charts/hawkbit/README.md
+        - charts/hawkbit/templates/deployment.yaml
+        - charts/hawkbit/templates/db-migrate-hook.yaml
+        - charts/hawkbit/values.yaml
+    - id: comp-chart-hono
+      name: hono
+      path: charts/hono
+      evidence:
+        - charts/hono/Chart.yaml
+        - charts/hono/README.md
+        - charts/hono/templates/hono-adapter-mqtt/hono-adapter-mqtt-deployment.yaml
+    - id: comp-chart-ditto
+      name: ditto
+      path: charts/ditto
+      evidence:
+        - charts/ditto/Chart.yaml
+        - charts/ditto/README.md
+        - charts/ditto/templates/gateway-deployment.yaml
+    - id: comp-pkg-cloud2edge
+      name: cloud2edge
+      path: packages/cloud2edge
+      evidence:
+        - packages/cloud2edge/Chart.yaml
+        - packages/cloud2edge/README.md
+        - packages/cloud2edge/templates/post-install-job.yaml
+        - packages/cloud2edge/values.yaml
+        - packages/cloud2edge/profileAmqpMessaging-values.yaml
+    - id: comp-pkg-telemetry-e2e
+      name: telemetry-e2e
+      path: packages/telemetry-e2e
+      evidence:
+        - packages/telemetry-e2e/Chart.yaml
+        - packages/telemetry-e2e/README.md
+        - packages/telemetry-e2e/values.yaml
+    - id: comp-homepage
+      name: homepage
+      path: homepage
+      evidence:
+        - homepage/README.md
+        - homepage/_config.yml
+        - homepage/Gemfile
+  dependencies:
+    - id: dep-mariadb
+      name: mariadb
+      type: external
+      evidence:
+        - charts/hawkbit/Chart.yaml
+    - id: dep-rabbitmq
+      name: rabbitmq
+      type: external
+      evidence:
+        - charts/hawkbit/Chart.yaml
+    - id: dep-mongodb-ditto
+      name: mongodb
+      type: external
+      evidence:
+        - charts/ditto/Chart.yaml
+    - id: dep-mongodb-hono
+      name: mongodb
+      type: external
+      evidence:
+        - charts/hono/Chart.yaml
+    - id: dep-kafka
+      name: kafka
+      type: external
+      evidence:
+        - charts/hono/Chart.yaml
+    - id: dep-prometheus
+      name: prometheus
+      type: external
+      evidence:
+        - charts/hono/Chart.yaml
+    - id: dep-grafana
+      name: grafana
+      type: external
+      evidence:
+        - charts/hono/Chart.yaml
+    - id: dep-hono-package
+      name: hono
+      type: external
+      evidence:
+        - packages/cloud2edge/Chart.yaml
+    - id: dep-ditto-oci
+      name: ditto
+      type: external
+      evidence:
+        - packages/cloud2edge/Chart.yaml
+    - id: dep-strimzi
+      name: strimzi-kafka-operator
+      type: external
+      evidence:
+        - packages/telemetry-e2e/Chart.yaml
+    - id: dep-drogue-cloud-core
+      name: drogue-cloud-core
+      type: external
+      evidence:
+        - packages/telemetry-e2e/Chart.yaml
+    - id: dep-streamsheets
+      name: streamsheets
+      type: external
+      evidence:
+        - packages/telemetry-e2e/Chart.yaml
+    - id: dep-jekyll
+      name: jekyll
+      type: external
+      evidence:
+        - homepage/Gemfile
+  external_services:
+    - id: svc-kubernetes
+      value: Kubernetes cluster (kind in CI; any cluster for installs)
+      evidence:
+        - .github/workflows/ci.yaml
+        - .github/kind-config.yaml
+        - README.md
+    - id: svc-helm-chart-repos
+      value: Helm chart repositories (eclipse.dev/packages/charts, bitnami, prometheus-community, grafana)
+      evidence:
+        - .github/ct.yaml
+        - .github/kubeval.sh
+    - id: svc-oci-registries
+      value: OCI registries (Docker Hub bitnami/cloudpirates/eclipse charts)
+      evidence:
+        - charts/hawkbit/Chart.yaml
+        - charts/hono/Chart.yaml
+        - packages/cloud2edge/Chart.yaml
+    - id: svc-github-actions
+      value: GitHub Actions CI
+      evidence:
+        - .github/workflows/ci.yaml
+    - id: svc-jenkins
+      value: Jenkins (website and helm package publish)
+      evidence:
+        - .jenkins/Jenkinsfile
+  testing:
+    - id: test-chart-testing
+      framework: chart-testing (ct lint/install)
+      evidence:
+        - .github/workflows/ci.yaml
+        - .github/ct.yaml
+    - id: test-kubeval
+      framework: kubeval
+      evidence:
+        - .github/kubeval.sh
+        - .github/workflows/ci.yaml
+    - id: test-shellcheck
+      framework: shellcheck
+      evidence:
+        - .github/workflows/ci.yaml
+        - .github/lint-scripts.sh
+    - id: test-hawkbit-render
+      framework: hawkbit helm render golden tests
+      evidence:
+        - charts/hawkbit/test/render-test.sh
+        - charts/hawkbit/test/live-test.sh
+    - id: test-helm-lint
+      framework: helm lint
+      evidence:
+        - charts/hawkbit/lint.sh
+        - homepage/contribute.md
+analysis:
+  purpose:
+    value: Eclipse IoT Packages provides Helm charts and multi-project packages so Eclipse IoT stacks (Hono, Ditto, hawkBit, and end-to-end scenarios) can be deployed on Kubernetes, plus a Jekyll site that documents and publishes those charts.
+    confidence: high
+    evidence_refs:
+      - entry-homepage-index
+      - comp-chart-hono
+      - comp-chart-hawkbit
+      - comp-pkg-cloud2edge
+  architecture:
+    value: "Single repo with three layers: charts/* are individual Eclipse IoT Helm charts; packages/* compose charts into end-to-end scenarios (cloud2edge = Hono+Ditto; telemetry-e2e = Drogue/Kafka/Ditto/etc.); homepage is a Jekyll site. GitHub Actions runs chart-testing and kubeval on charts/packages; Jenkins packages charts and publishes the website/helm repo on master."
+    confidence: high
+    evidence_refs:
+      - comp-chart-hawkbit
+      - comp-chart-hono
+      - comp-pkg-cloud2edge
+      - comp-pkg-telemetry-e2e
+      - comp-homepage
+      - entry-ci-workflow
+      - entry-jenkinsfile
+  patterns:
+    - id: pat-helm-profiles
+      value: Optional deploy profiles as sibling *-values.yaml files applied with helm -f (AMQP messaging, OpenShift, tracing, monitoring).
+      confidence: high
+      evidence_refs:
+        - comp-pkg-cloud2edge
+        - comp-chart-hono
+    - id: pat-post-install-hooks
+      value: Packages use Helm post-install Jobs to seed demo devices, credentials, and cross-service connections after chart install.
+      confidence: high
+      evidence_refs:
+        - comp-pkg-cloud2edge
+        - entry-pkg-cloud2edge
+    - id: pat-chart-ci-matrix
+      value: CI lints bash, runs ct lint, kubeval across Kubernetes versions, then ct install on kind with ingress-nginx when charts change.
+      confidence: high
+      evidence_refs:
+        - entry-ci-workflow
+        - test-chart-testing
+        - test-kubeval
+    - id: pat-eca-signed-commits
+      value: Contributions require Eclipse ECA and git commit -s sign-off; commit messages prefer [#issue] prefixes.
+      confidence: high
+      evidence_refs:
+        - entry-contributing
+  component_notes:
+    - ref: comp-chart-hawkbit
+      purpose: Helm chart for Eclipse hawkBit software-update server, with MariaDB/RabbitMQ dependencies, optional microservices, GUI, and DB migrate pre-install Job.
+      confidence: high
+    - ref: comp-chart-hono
+      purpose: Primary Helm chart for Eclipse Hono device connectivity (MQTT/HTTP/AMQP/CoAP/LoRa adapters, device registry, Kafka or AMQP messaging, optional monitoring).
+      confidence: high
+    - ref: comp-chart-ditto
+      purpose: Deprecated local Ditto digital-twins chart retained in-repo; upstream chart now lives in eclipse-ditto/ditto and Docker Hub OCI.
+      confidence: high
+    - ref: comp-pkg-cloud2edge
+      purpose: Package chart composing Hono and Ditto with post-install wiring for a cloud-to-edge demo scenario.
+      confidence: high
+    - ref: comp-pkg-telemetry-e2e
+      purpose: End-to-end telemetry example spanning sensor/gateway/cloud tiers using Drogue Cloud, Strimzi Kafka, Ditto, and Streamsheets.
+      confidence: high
+    - ref: comp-homepage
+      purpose: Jekyll site for eclipse.dev/packages documentation and published Helm chart repository content.
+      confidence: high
+  service_notes:
+    - ref: svc-kubernetes
+      integration: Charts and packages target Kubernetes; CI creates kind clusters for install tests.
+      confidence: high
+    - ref: svc-helm-chart-repos
+      integration: ct.yaml and kubeval.sh register external Helm repos needed to resolve chart dependencies during lint/install.
+      confidence: high
+    - ref: svc-oci-registries
+      integration: Several Chart.yaml dependencies pull from OCI registries (Docker Hub bitnami/cloudpirates/eclipse).
+      confidence: high
+    - ref: svc-github-actions
+      integration: Pull requests touching charts/** or packages/** trigger lint, kubeval, and install jobs.
+      confidence: high
+    - ref: svc-jenkins
+      integration: Jenkins builds Helm packages and the Jekyll site; on master it merges new charts into the website helm repo and pushes packages-website.
+      confidence: high
+  dangerous_areas:
+    - id: danger-hawkbit-db-migrate
+      value: hawkBit DB migrate Helm/ArgoCD pre-sync Job plus Deployment updateStrategy Recreate
+      reason: Installs/upgrades run a migrate Job before pods; Recreate strategy tears down all pods during upgrades, so a failed migrate or long downtime can break rolling continuity.
+      confidence: high
+      evidence_refs:
+        - comp-chart-hawkbit
+        - entry-chart-hawkbit
+    - id: danger-demo-credentials
+      value: Default demo passwords in chart/package values
+      reason: values.yaml files ship plaintext demo credentials (e.g. hawkbit admin/{noop}admin, cloud2edge demo-secret/verysecret) unsuitable for production without override.
+      confidence: high
+      evidence_refs:
+        - comp-chart-hawkbit
+        - comp-pkg-cloud2edge
+    - id: danger-packages-excluded-ci
+      value: cloud2edge and telemetry-e2e excluded from chart-testing
+      reason: .github/ct.yaml excluded-charts skips both packages, so CI lint/install coverage does not exercise those composed packages.
+      confidence: high
+      evidence_refs:
+        - test-chart-testing
+        - entry-ci-workflow
+    - id: danger-hawkbit-external-test-deps
+      value: hawkbit render/live tests depend on out-of-repo paths and LVT hosts
+      reason: render-test.sh reads $HOME/src/argocd/values/infrastructure/hawkbit; live-test.sh hits LVT URLs and Vault paths not present in this repo.
+      confidence: high
+      evidence_refs:
+        - test-hawkbit-render
+        - comp-chart-hawkbit
+    - id: danger-ditto-deprecated
+      value: Local charts/ditto is marked deprecated
+      reason: Chart.yaml sets deprecated true and README points to eclipse-ditto/ditto; editing this copy may not affect the published OCI chart cloud2edge depends on.
+      confidence: high
+      evidence_refs:
+        - comp-chart-ditto
+        - dep-ditto-oci
+  questions:
+    - id: q-lvt-overlay-scope
+      question: hawkbit_resources.yaml and AGENTS.MD describe LiveViewTech ArgoCD/Vault/Terraform/ExternalSecrets environments (devops/int/stg/prd) that are not explained by the Eclipse IoT Packages README. What is the intended ownership boundary between upstream Eclipse packaging and this fork's LVT hawkBit ops overlay?
+      area: ownership
+      priority: high
+      evidence_refs:
+        - comp-chart-hawkbit
+        - entry-chart-hawkbit
+    - id: q-telemetry-ci-exclusion-why
+      question: Why are telemetry-e2e and cloud2edge listed under excluded-charts in .github/ct.yaml — resource cost, flakiness, or intentional non-maintenance?
+      area: ci
+      priority: medium
+      evidence_refs:
+        - test-chart-testing
+    - id: q-ditto-local-vs-oci
+      question: Should charts/ditto remain in this repo for reference only, or is there still a publish path for it via Jenkins helm package that conflicts with the deprecated/OCI guidance?
+      area: packaging
+      priority: medium
+      evidence_refs:
+        - comp-chart-ditto
+        - entry-jenkinsfile
+        - dep-ditto-oci
+    - id: q-hawkbit-resources-accuracy
+      question: Can the LVT paths and hostnames in hawkbit_resources.yaml and charts/hawkbit/test/live-test.sh be independently verified from this sandbox, or should agents treat that registry as fork-local ops documentation only?
+      area: ops-docs
+      priority: high
+      evidence_refs:
+        - test-hawkbit-render
+        - comp-chart-hawkbit
