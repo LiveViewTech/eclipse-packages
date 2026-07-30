@@ -46,11 +46,11 @@ helm install eclipse-hono eclipse-iot/hono -n hono --wait
 
 ## Directory Map
 
-- `charts/hawkbit/` → see `charts/hawkbit/AGENTS.md`
-- `charts/hono/` → see `charts/hono/AGENTS.md`
-- `charts/ditto/` → see `charts/ditto/AGENTS.md`
-- `packages/cloud2edge/` → see `packages/cloud2edge/AGENTS.md`
-- `packages/telemetry-e2e/` → see `packages/telemetry-e2e/AGENTS.md`
+- `charts/hawkbit/` → hawkBit update-server chart (optional `vaultAgent` sidecar hooks in `values.yaml`)
+- `charts/hono/` → Hono chart; deploy overlays in `profile*-values.yaml` and `ci/*-values.yaml`
+- `charts/ditto/` → deprecated local chart (see Gotchas)
+- `packages/cloud2edge/` → Hono+Ditto demo package; post-install Jobs wire demo tenant/device
+- `packages/telemetry-e2e/` → Drogue/Kafka/Ditto/Streamsheets e2e package
 - `homepage/` → see `homepage/AGENTS.md`
 
 ## Gotchas
@@ -59,4 +59,4 @@ helm install eclipse-hono eclipse-iot/hono -n hono --wait
 - **Demo credentials** in values are not production-safe (`charts/hawkbit/values.yaml`, `packages/cloud2edge/values.yaml`)
 - **`cloud2edge` and `telemetry-e2e` are excluded** from chart-testing (`.github/ct.yaml`)
 - hawkBit `test/render-test.sh` / `test/live-test.sh` depend on out-of-repo ArgoCD values and LVT hosts
-- Local `charts/ditto` is deprecated; cloud2edge pulls Ditto from OCI (`packages/cloud2edge/Chart.yaml`)
+- Local `charts/ditto` is deprecated; cloud2edge pulls Ditto from OCI (`packages/cloud2edge/Chart.yaml`); Jenkins still packages `charts/*/Chart.yaml` (`.jenkins/Jenkinsfile`)
